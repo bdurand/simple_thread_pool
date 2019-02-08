@@ -25,52 +25,26 @@ class SimpleThreadPool
   # sequentially.
   def execute(id = nil, &block)
     loop do
-      while @threads.size >= @max_threads || (!id.nil? && @processing_ids.include?(id))
-        @processing_ids.include?(id)
+      # Check if a new thread can be added without blocking.
+      while !can_add_thread?(id)
         sleep(0.001)
       end
-      unique_id = true
-      unless id.nil?
-        @lock.synchronize do
-          if @processing_ids.include?(id)
-            unique_id = false
-          else
-            @processing_ids << id
-          end
+      
+      @lock.synchronize do
+        # Check again inside a synchronized block if the thread can still be added.
+        if can_add_thread?(id)
+          @processing_ids << id unless id.nil?
+          add_thread(id, block)
+          return
         end
       end
-      break if unique_id
-    end
-
-    main_thread = Thread.current
-
-    @lock.synchronize do
-      thread = Thread.new do
-        begin
-          block.call
-          # Return nil to ensure no objects are leaked.
-          nil
-        ensure
-          @lock.synchronize do
-            @processing_ids.delete(id) unless id.nil?
-            @threads.delete(Thread.current)
-          end
-          main_thread.wakeup if main_thread.alive?
-        end
-      end
-
-      @threads << thread if thread.alive?
-      thread = nil
     end
   end
 
   # Call this method to block until all current threads have finished executing.
   def finish
-    loop do
-      active_threads = @lock.synchronize { @threads.select(&:alive?) }
-      break if active_threads.empty?
-      active_threads.each(&:join)
-    end
+    active_threads = @lock.synchronize { @threads.select(&:alive?) }
+    active_threads.each(&:join)
     nil
   end
 
@@ -79,6 +53,33 @@ class SimpleThreadPool
   # threads.
   def synchronize(&block)
     @lock.synchronize(&block)
+  end
+  
+  private
+  
+  def can_add_thread?(id)
+    @threads.size < @max_threads && (id.nil? || !@processing_ids.include?(id))
+  end
+  
+  # Spawn a thread in this method to ensure that it doesn't accidentally pick up any local variables.
+  def add_thread(id, block)
+    main_thread = Thread.current
+    
+    @threads << Thread.new do
+      begin
+        block.call
+        # Return nil to ensure no objects are leaked.
+        nil
+      ensure
+        @lock.synchronize do
+          @processing_ids.delete(id) unless id.nil?
+          @threads.delete(Thread.current)
+        end
+        main_thread.wakeup if main_thread.alive?
+      end
+    end
+
+    nil
   end
 
 end
