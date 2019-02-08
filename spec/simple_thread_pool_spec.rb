@@ -7,14 +7,18 @@ describe SimpleThreadPool do
     results = []
     thread_pool = SimpleThreadPool.new(10)
 
-    1000.times do |i|
+    100.times do |i|
       thread_pool.execute do
-        lock.synchronize { results << i }
+        lock.synchronize do
+          results << i
+          sleep(rand(10) / 1000.0)
+        end
       end
     end
 
     thread_pool.finish
-    expect(results).to match_array((0...1000).to_a)
+    expect(results).to match_array((0...100).to_a)
+    expect(results).to_not eq (0...100).to_a
   end
 
 
@@ -23,14 +27,17 @@ describe SimpleThreadPool do
     results = []
     thread_pool = SimpleThreadPool.new(10)
 
-    1000.times do |i|
+    100.times do |i|
       thread_pool.execute("lock") do
-        lock.synchronize { results << i }
+        lock.synchronize  do
+          results << i
+          sleep(rand(10) / 1000.0)
+        end
       end
     end
 
     thread_pool.finish
-    expect(results).to eq (0...1000).to_a
+    expect(results).to eq (0...100).to_a
   end
 
 end

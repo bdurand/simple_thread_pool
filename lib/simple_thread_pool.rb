@@ -44,22 +44,24 @@ class SimpleThreadPool
 
     main_thread = Thread.current
 
-    thread = Thread.new do
-      begin
-        block.call
-        # Return nil to ensure no objects are leaked.
-        nil
-      ensure
-        @lock.synchronize do
-          @processing_ids.delete(id) unless id.nil?
-          @threads.delete(Thread.current)
+    @lock.synchronize do
+      thread = Thread.new do
+        begin
+          block.call
+          # Return nil to ensure no objects are leaked.
+          nil
+        ensure
+          @lock.synchronize do
+            @processing_ids.delete(id) unless id.nil?
+            @threads.delete(Thread.current)
+          end
+          main_thread.wakeup if main_thread.alive?
         end
-        main_thread.wakeup if main_thread.alive?
       end
-    end
 
-    @lock.synchronize { @threads << thread if thread.alive? }
-    thread = nil
+      @threads << thread if thread.alive?
+      thread = nil
+    end
   end
 
   # Call this method to block until all current threads have finished executing.
