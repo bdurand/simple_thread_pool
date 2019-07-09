@@ -48,7 +48,7 @@ thread_pool.finish
 
 ### Error handling.
 
-All error handling must be conducted inside the execute block. The main thread will not be notified of any exceptions. You can use the `synchronized` method on the thread pool if you need to work data from the main thread.
+All error handling must be conducted inside the execute block. The main thread will not be notified of any exceptions. You can use the `synchronize` method on the thread pool if you need to work with data from the main thread.
 
 Example of how you can track any errors in a shared array.
 
@@ -59,7 +59,7 @@ thread_pool.execute do
   begin
     # Do something
   rescue Error => e
-    thread_pool.synchronized { errors << e }
+    thread_pool.synchronize { errors << e }
     raise e
   end
 end
