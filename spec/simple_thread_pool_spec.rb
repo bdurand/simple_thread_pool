@@ -8,9 +8,9 @@ describe SimpleThreadPool do
 
     100.times do |i|
       thread_pool.execute do
+        sleep(rand(100) / 1000.0)
         lock.synchronize do
           results << i
-          sleep(rand(10) / 1000.0)
         end
       end
     end
@@ -27,9 +27,9 @@ describe SimpleThreadPool do
 
     100.times do |i|
       thread_pool.execute("lock") do
+        sleep(rand(100) / 1000.0)
         lock.synchronize do
           results << i
-          sleep(rand(10) / 1000.0)
         end
       end
     end
