@@ -1,6 +1,9 @@
 source "https://rubygems.org"
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
-
-# Specify your gem's dependencies in simple_thread_pool.gemspec
 gemspec
+
+gem "rspec", "~> 3.10"
+gem "appraisal"
+gem "standard", "~> 1.0"
+gem "simplecov", "~> 0.21", require: false
+gem "yard"
