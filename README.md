@@ -3,6 +3,7 @@
 [![Continuous Integration](https://github.com/bdurand/simple_thread_pool/actions/workflows/continuous_integration.yml/badge.svg)](https://github.com/bdurand/simple_thread_pool/actions/workflows/continuous_integration.yml)
 [![Regression Test](https://github.com/bdurand/simple_thread_pool/actions/workflows/regression_test.yml/badge.svg)](https://github.com/bdurand/simple_thread_pool/actions/workflows/regression_test.yml)
 [![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
+[![Gem Version](https://badge.fury.io/rb/simple_thread_pool.svg)](https://badge.fury.io/rb/simple_thread_pool)
 
 Simple implementation of the thread pool to manage executing tasks in parallel. The thread pool implemented by this code is designed to allow throttled, parallel execution of tasks.
 
